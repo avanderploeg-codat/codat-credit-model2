@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Codat Credit Model</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+  </head>
+  <body class="bg-slate-50 min-h-screen">
+    <!-- ── Auth Screen ───────────────────────────────────────────────────── -->
+    <div
+      id="auth-screen"
+      class="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 flex items-center justify-center p-4"
+    >
+      <div class="w-full max-w-md">
+        <div class="text-center mb-8">
+          <div
+            class="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-blue-600 mb-4 shadow-lg"
+          >
+            <svg
+              class="w-8 h-8 text-white"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="1.8"
+                d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
+              />
+            </svg>
+          </div>
+          <h1 class="text-2xl font-bold text-white">Codat Credit Model</h1>
+          <p class="text-slate-400 text-sm mt-1">
+            Underwriting at the Speed of Data
+          </p>
+        </div>
+        <div class="bg-white rounded-2xl shadow-2xl p-8">
+          <h2 class="text-lg font-semibold text-slate-800 mb-1">
+            Connect your account
+          </h2>
+          <p class="text-slate-500 text-sm mb-6">
+            Click below to verify your Codat connection and load your companies.
+          </p>
+          <div
+            id="auth-error"
+            class="hidden mb-4 flex items-start gap-2 text-red-600 text-sm bg-red-50 border border-red-200 rounded-lg px-3 py-2"
+          ></div>
+          <button
+            onclick="handleConnect()"
+            class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded-lg transition flex items-center justify-center gap-2 text-sm"
+          >
+            Connect to Codat
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Company Selector ──────────────────────────────────────────────── -->
+    <div id="company-screen" class="hidden min-h-screen bg-slate-50">
+      <header
+        class="bg-white border-b border-slate-200 px-6 py-4 flex items-center justify-between"
+      >
+        <div class="flex items-center gap-3">
+          <div
+            class="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center"
+          >
+            <svg
+              class="w-5 h-5 text-white"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="1.8"
+                d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
+              />
+            </svg>
+          </div>
+          <span class="font-semibold text-slate-800 text-sm"
+            >Codat Credit Model</span
+          >
+          <span
+            class="text-xs bg-blue-100 text-blue-700 px-1.5 py-0.5 rounded font-medium"
+            >Beta</span
+          >
+        </div>
+        <button
+          onclick="handleDisconnect()"
+          class="text-sm text-slate-500 hover:text-slate-700"
+        >
+          Disconnect
+        </button>
+      </header>
+      <main class="max-w-4xl mx-auto px-6 py-8">
+        <div class="mb-6">
+          <h1 class="text-xl font-bold text-slate-800">Select a Company</h1>
+          <p class="text-slate-500 text-sm mt-1">
+            Choose a connected company to generate a credit model report.
+          </p>
+        </div>
+        <div class="relative mb-4">
+          <span class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">
+            <svg
+              class="w-4 h-4"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M21 21l-4.35-4.35M17 11A6 6 0 115 11a6 6 0 0112 0z"
+              />
+            </svg>
+          </span>
+          <input
+            id="search-input"
+            type="text"
+            oninput="handleSearch(this.value)"
+            placeholder="Search companies…"
+            class="w-full border border-slate-300 rounded-lg pl-9 pr-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+        </div>
+        <div id="company-list"></div>
+        <div
+          id="pagination"
+          class="flex items-center justify-between mt-4 text-sm text-slate-500 hidden"
+        >
+          <span id="page-info"></span>
+          <div class="flex gap-2">
+            <button
+              onclick="changePage(-1)"
+              id="prev-btn"
+              class="px-3 py-1.5 border border-slate-300 rounded-lg disabled:opacity-40 hover:bg-slate-100"
+            >
+              ← Prev
+            </button>
+            <button
+              onclick="changePage(1)"
+              id="next-btn"
+              class="px-3 py-1.5 border border-slate-300 rounded-lg disabled:opacity-40 hover:bg-slate-100"
+            >
+              Next →
+            </button>
+          </div>
+        </div>
+      </main>
+    </div>
+
+    <!-- ── Dashboard ─────────────────────────────────────────────────────── -->
+    <div
+      id="dashboard-screen"
+      class="hidden min-h-screen bg-slate-50 flex flex-col items-center justify-center gap-4 text-center px-4"
+    >
+      <div
+        class="w-14 h-14 rounded-2xl bg-emerald-100 flex items-center justify-center"
+      >
+        <svg
+          class="w-7 h-7 text-emerald-600"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M5 13l4 4L19 7"
+          />
+        </svg>
+      </div>
+      <h2 id="dashboard-name" class="text-xl font-bold text-slate-800"></h2>
+      <p class="text-slate-500 text-sm max-w-sm">
+        Company connected. The Financial Summary dashboard will be built here
+        next.
+      </p>
+      <code
+        id="dashboard-id"
+        class="text-xs text-slate-400 bg-slate-100 px-2 py-1 rounded"
+      ></code>
+      <button
+        onclick="showScreen('company')"
+        class="mt-4 text-sm text-blue-600 hover:underline"
+      >
+        ← Back to companies
+      </button>
+    </div>
+
+    <script>
+      const STATUS_COLORS = {
+        Linked: 'bg-emerald-100 text-emerald-700',
+        PendingAuth: 'bg-amber-100 text-amber-700',
+        Deauthorized: 'bg-red-100 text-red-700',
+        Unlinked: 'bg-slate-100 text-slate-500',
+      };
+      const DOT_COLORS = {
+        Linked: 'bg-emerald-500',
+        PendingAuth: 'bg-amber-500',
+        Deauthorized: 'bg-red-500',
+        Unlinked: 'bg-slate-400',
+      };
+
+      let currentPage = 1;
+      let totalPages = 1;
+      let searchQuery = '';
+
+      function showScreen(name) {
+        document.getElementById('auth-screen').classList.add('hidden');
+        document.getElementById('company-screen').classList.add('hidden');
+        document.getElementById('dashboard-screen').classList.add('hidden');
+        document.getElementById(name + '-screen').classList.remove('hidden');
+      }
+
+      async function handleConnect() {
+        const btn = event.target;
+        btn.textContent = 'Connecting…';
+        btn.disabled = true;
+        try {
+          const res = await fetch('/api/companies?pageSize=1');
+          if (res.ok) {
+            showScreen('company');
+            fetchCompanies(1, '');
+          } else {
+            showError(
+              'auth-error',
+              `Server error (${res.status}). Check your CODAT_API_KEY in .env`
+            );
+          }
+        } catch (e) {
+          showError('auth-error', 'Could not reach the server.');
+        } finally {
+          btn.textContent = 'Connect to Codat';
+          btn.disabled = false;
+        }
+      }
+
+      function handleDisconnect() {
+        showScreen('auth');
+      }
+
+      function showError(id, msg) {
+        const el = document.getElementById(id);
+        el.textContent = msg;
+        el.classList.remove('hidden');
+      }
+
+      let searchTimeout;
+      function handleSearch(val) {
+        clearTimeout(searchTimeout);
+        searchTimeout = setTimeout(() => {
+          searchQuery = val;
+          fetchCompanies(1, val);
+        }, 400);
+      }
+
+      function changePage(dir) {
+        const newPage = currentPage + dir;
+        if (newPage < 1 || newPage > totalPages) return;
+        fetchCompanies(newPage, searchQuery);
+      }
+
+      async function fetchCompanies(page, query) {
+        currentPage = page;
+        const list = document.getElementById('company-list');
+        list.innerHTML =
+          '<div class="flex items-center justify-center py-20 text-slate-400 text-sm">Loading companies…</div>';
+        try {
+          const params = new URLSearchParams({ page, pageSize: 10 });
+          if (query) params.set('query', `name=${query}`);
+          const res = await fetch(`/api/companies?${params}`);
+          const data = await res.json();
+          const companies = data.results || [];
+          totalPages = Math.ceil((data.totalResults || 0) / 10) || 1;
+          renderCompanies(companies);
+          renderPagination();
+        } catch (e) {
+          list.innerHTML = `<div class="text-red-600 text-sm bg-red-50 border border-red-200 rounded-lg px-4 py-3">Failed to load companies: ${e.message}</div>`;
+        }
+      }
+
+      function renderCompanies(companies) {
+        const list = document.getElementById('company-list');
+        if (!companies.length) {
+          list.innerHTML =
+            '<div class="text-center py-20 text-slate-400 text-sm">No companies found.</div>';
+          return;
+        }
+        list.innerHTML = `<div class="bg-white rounded-xl border border-slate-200 divide-y divide-slate-100 shadow-sm">
+        ${companies
+          .map((c) => {
+            const status = c.dataConnections?.[0]?.status || 'Unlinked';
+            const hasAccounting = c.dataConnections?.some(
+              (d) => d.sourceType === 'Accounting' && d.status === 'Linked'
+            );
+            const hasBanking = c.dataConnections?.some(
+              (d) => d.sourceType === 'Banking' && d.status === 'Linked'
+            );
+            const statusColor = STATUS_COLORS[status] || STATUS_COLORS.Unlinked;
+            const dotColor = DOT_COLORS[status] || DOT_COLORS.Unlinked;
+            return `
+            <button onclick="selectCompany('${c.id}', '${c.name.replace(
+              /'/g,
+              "\\'"
+            )}')"
+              class="w-full text-left px-5 py-4 hover:bg-slate-50 transition flex items-center justify-between group">
+              <div class="flex items-center gap-4">
+                <div class="w-10 h-10 rounded-lg bg-slate-100 flex items-center justify-center text-slate-600 font-bold text-sm flex-shrink-0">
+                  ${c.name?.[0]?.toUpperCase() || '?'}
+                </div>
+                <div>
+                  <div class="font-medium text-slate-800 text-sm">${
+                    c.name
+                  }</div>
+                  <div class="flex items-center gap-2 mt-1">
+                    <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-medium border ${
+                      hasAccounting
+                        ? 'bg-blue-50 border-blue-200 text-blue-700'
+                        : 'bg-slate-50 border-slate-200 text-slate-400'
+                    }">
+                      ${hasAccounting ? '✓ ' : ''}Accounting
+                    </span>
+                    <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-medium border ${
+                      hasBanking
+                        ? 'bg-blue-50 border-blue-200 text-blue-700'
+                        : 'bg-slate-50 border-slate-200 text-slate-400'
+                    }">
+                      ${hasBanking ? '✓ ' : ''}Banking
+                    </span>
+                  </div>
+                </div>
+              </div>
+              <div class="flex items-center gap-3">
+                <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium ${statusColor}">
+                  <span class="w-1.5 h-1.5 rounded-full ${dotColor}"></span>${status}
+                </span>
+                <svg class="w-4 h-4 text-slate-300 group-hover:text-blue-500 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                </svg>
+              </div>
+            </button>`;
+          })
+          .join('')}
+      </div>`;
+      }
+
+      function renderPagination() {
+        const el = document.getElementById('pagination');
+        if (totalPages <= 1) {
+          el.classList.add('hidden');
+          return;
+        }
+        el.classList.remove('hidden');
+        document.getElementById(
+          'page-info'
+        ).textContent = `Page ${currentPage} of ${totalPages}`;
+        document.getElementById('prev-btn').disabled = currentPage === 1;
+        document.getElementById('next-btn').disabled =
+          currentPage === totalPages;
+      }
+
+      function selectCompany(id, name) {
+        document.getElementById('dashboard-name').textContent = name;
+        document.getElementById('dashboard-id').textContent = `ID: ${id}`;
+        showScreen('dashboard');
+      }
+    </script>
+  </body>
+</html>
