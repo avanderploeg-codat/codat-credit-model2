@@ -86,7 +86,10 @@ app.get('/api/companies/:id/financials/bs', async (req, res) => {
 // ── Helpers ───────────────────────────────────────────────────────────────────
 function getTodayDate() {
   const now = new Date();
-  return `${String(now.getDate()).padStart(2,'0')}-${String(now.getMonth()+1).padStart(2,'0')}-${now.getFullYear()}`;
+  const dd = String(now.getDate()).padStart(2,'0');
+  const mm = String(now.getMonth()+1).padStart(2,'0');
+  const yyyy = now.getFullYear();
+  return `${dd}-${mm}-${yyyy}`;
 }
 
 // ── Serve frontend ────────────────────────────────────────────────────────────

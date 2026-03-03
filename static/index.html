@@ -363,7 +363,7 @@ async function loadFinancials() {
 
 function formatDateForApi(yyyyMM) {
   const [y, m] = yyyyMM.split('-');
-  const lastDay = new Date(y, m, 0).getDate();
+  const lastDay = new Date(parseInt(y), parseInt(m), 0).getDate();
   return `${String(lastDay).padStart(2,'0')}-${String(m).padStart(2,'0')}-${y}`;
 }
 
