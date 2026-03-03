@@ -83,6 +83,16 @@ app.get('/api/companies/:id/financials/bs', async (req, res) => {
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
+// Debug route — shows raw API response
+app.get('/api/debug/:id', async (req, res) => {
+  const reportDate = '28-02-2026';
+  const result = await codatFetch(
+    `/lending/companies/${req.params.id}/reports/enhancedProfitAndLoss/accounts?reportDate=${reportDate}&numberOfPeriods=12`,
+    'GET'
+  );
+  res.status(result.status).json(result.data);
+});
+
 // ── Helpers ───────────────────────────────────────────────────────────────────
 function getTodayDate() {
   const now = new Date();
