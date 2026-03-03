@@ -86,7 +86,7 @@ app.get('/api/companies/:id/financials/bs', async (req, res) => {
 // Debug route — shows raw API response
 app.get('/api/debug/:id', async (req, res) => {
   const result = await codatFetch(
-    `/companies/${req.params.id}/data/financials/profitAndLoss?periodLength=1&startMonth=2025-01`,
+    `/companies/${req.params.id}/dataStatus`,
     'GET'
   );
   res.status(result.status).json(result.data);
