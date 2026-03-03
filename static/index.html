@@ -1,373 +1,584 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Codat Credit Model</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-  </head>
-  <body class="bg-slate-50 min-h-screen">
-    <!-- ── Auth Screen ───────────────────────────────────────────────────── -->
-    <div
-      id="auth-screen"
-      class="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 flex items-center justify-center p-4"
-    >
-      <div class="w-full max-w-md">
-        <div class="text-center mb-8">
-          <div
-            class="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-blue-600 mb-4 shadow-lg"
-          >
-            <svg
-              class="w-8 h-8 text-white"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="1.8"
-                d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
-              />
-            </svg>
-          </div>
-          <h1 class="text-2xl font-bold text-white">Codat Credit Model</h1>
-          <p class="text-slate-400 text-sm mt-1">
-            Underwriting at the Speed of Data
-          </p>
-        </div>
-        <div class="bg-white rounded-2xl shadow-2xl p-8">
-          <h2 class="text-lg font-semibold text-slate-800 mb-1">
-            Connect your account
-          </h2>
-          <p class="text-slate-500 text-sm mb-6">
-            Click below to verify your Codat connection and load your companies.
-          </p>
-          <div
-            id="auth-error"
-            class="hidden mb-4 flex items-start gap-2 text-red-600 text-sm bg-red-50 border border-red-200 rounded-lg px-3 py-2"
-          ></div>
-          <button
-            onclick="handleConnect()"
-            class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded-lg transition flex items-center justify-center gap-2 text-sm"
-          >
-            Connect to Codat
-          </button>
-        </div>
-      </div>
-    </div>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Codat Credit Model</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    .scrollbar-thin::-webkit-scrollbar { height: 4px; width: 4px; }
+    .scrollbar-thin::-webkit-scrollbar-track { background: #f1f5f9; }
+    .scrollbar-thin::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 2px; }
+    .tab-active { border-bottom: 2px solid #2563eb; color: #2563eb; }
+    .num { text-align: right; font-variant-numeric: tabular-nums; }
+    .negative { color: #dc2626; }
+    .positive { color: #16a34a; }
+    tr.section-header td { background: #f8fafc; font-weight: 600; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.05em; color: #64748b; }
+    tr.subtotal td { background: #f1f5f9; font-weight: 600; }
+    tr.total td { background: #e2e8f0; font-weight: 700; }
+    tr.data-row:hover td { background: #f8fafc; }
+  </style>
+</head>
+<body class="bg-slate-50 min-h-screen">
 
-    <!-- ── Company Selector ──────────────────────────────────────────────── -->
-    <div id="company-screen" class="hidden min-h-screen bg-slate-50">
-      <header
-        class="bg-white border-b border-slate-200 px-6 py-4 flex items-center justify-between"
-      >
-        <div class="flex items-center gap-3">
-          <div
-            class="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center"
-          >
-            <svg
-              class="w-5 h-5 text-white"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="1.8"
-                d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
-              />
-            </svg>
-          </div>
-          <span class="font-semibold text-slate-800 text-sm"
-            >Codat Credit Model</span
-          >
-          <span
-            class="text-xs bg-blue-100 text-blue-700 px-1.5 py-0.5 rounded font-medium"
-            >Beta</span
-          >
-        </div>
-        <button
-          onclick="handleDisconnect()"
-          class="text-sm text-slate-500 hover:text-slate-700"
-        >
-          Disconnect
-        </button>
-      </header>
-      <main class="max-w-4xl mx-auto px-6 py-8">
-        <div class="mb-6">
-          <h1 class="text-xl font-bold text-slate-800">Select a Company</h1>
-          <p class="text-slate-500 text-sm mt-1">
-            Choose a connected company to generate a credit model report.
-          </p>
-        </div>
-        <div class="relative mb-4">
-          <span class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">
-            <svg
-              class="w-4 h-4"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M21 21l-4.35-4.35M17 11A6 6 0 115 11a6 6 0 0112 0z"
-              />
-            </svg>
-          </span>
-          <input
-            id="search-input"
-            type="text"
-            oninput="handleSearch(this.value)"
-            placeholder="Search companies…"
-            class="w-full border border-slate-300 rounded-lg pl-9 pr-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-          />
-        </div>
-        <div id="company-list"></div>
-        <div
-          id="pagination"
-          class="flex items-center justify-between mt-4 text-sm text-slate-500 hidden"
-        >
-          <span id="page-info"></span>
-          <div class="flex gap-2">
-            <button
-              onclick="changePage(-1)"
-              id="prev-btn"
-              class="px-3 py-1.5 border border-slate-300 rounded-lg disabled:opacity-40 hover:bg-slate-100"
-            >
-              ← Prev
-            </button>
-            <button
-              onclick="changePage(1)"
-              id="next-btn"
-              class="px-3 py-1.5 border border-slate-300 rounded-lg disabled:opacity-40 hover:bg-slate-100"
-            >
-              Next →
-            </button>
-          </div>
-        </div>
-      </main>
-    </div>
-
-    <!-- ── Dashboard ─────────────────────────────────────────────────────── -->
-    <div
-      id="dashboard-screen"
-      class="hidden min-h-screen bg-slate-50 flex flex-col items-center justify-center gap-4 text-center px-4"
-    >
-      <div
-        class="w-14 h-14 rounded-2xl bg-emerald-100 flex items-center justify-center"
-      >
-        <svg
-          class="w-7 h-7 text-emerald-600"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
-          <path
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            stroke-width="2"
-            d="M5 13l4 4L19 7"
-          />
+<!-- ── Auth Screen ──────────────────────────────────────────────────────────── -->
+<div id="auth-screen" class="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 flex items-center justify-center p-4">
+  <div class="w-full max-w-md">
+    <div class="text-center mb-8">
+      <div class="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-blue-600 mb-4 shadow-lg">
+        <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
         </svg>
       </div>
-      <h2 id="dashboard-name" class="text-xl font-bold text-slate-800"></h2>
-      <p class="text-slate-500 text-sm max-w-sm">
-        Company connected. The Financial Summary dashboard will be built here
-        next.
-      </p>
-      <code
-        id="dashboard-id"
-        class="text-xs text-slate-400 bg-slate-100 px-2 py-1 rounded"
-      ></code>
-      <button
-        onclick="showScreen('company')"
-        class="mt-4 text-sm text-blue-600 hover:underline"
-      >
-        ← Back to companies
+      <h1 class="text-2xl font-bold text-white">Codat Credit Model</h1>
+      <p class="text-slate-400 text-sm mt-1">Underwriting at the Speed of Data</p>
+    </div>
+    <div class="bg-white rounded-2xl shadow-2xl p-8">
+      <h2 class="text-lg font-semibold text-slate-800 mb-1">Connect your account</h2>
+      <p class="text-slate-500 text-sm mb-6">Click below to verify your Codat connection and load your companies.</p>
+      <div id="auth-error" class="hidden mb-4 text-red-600 text-sm bg-red-50 border border-red-200 rounded-lg px-3 py-2"></div>
+      <button onclick="handleConnect()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded-lg transition text-sm">
+        Connect to Codat
       </button>
     </div>
+  </div>
+</div>
 
-    <script>
-      const STATUS_COLORS = {
-        Linked: 'bg-emerald-100 text-emerald-700',
-        PendingAuth: 'bg-amber-100 text-amber-700',
-        Deauthorized: 'bg-red-100 text-red-700',
-        Unlinked: 'bg-slate-100 text-slate-500',
-      };
-      const DOT_COLORS = {
-        Linked: 'bg-emerald-500',
-        PendingAuth: 'bg-amber-500',
-        Deauthorized: 'bg-red-500',
-        Unlinked: 'bg-slate-400',
-      };
+<!-- ── Company Selector ─────────────────────────────────────────────────────── -->
+<div id="company-screen" class="hidden min-h-screen bg-slate-50">
+  <header class="bg-white border-b border-slate-200 px-6 py-4 flex items-center justify-between">
+    <div class="flex items-center gap-3">
+      <div class="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center">
+        <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+        </svg>
+      </div>
+      <span class="font-semibold text-slate-800 text-sm">Codat Credit Model</span>
+      <span class="text-xs bg-blue-100 text-blue-700 px-1.5 py-0.5 rounded font-medium">Beta</span>
+    </div>
+    <button onclick="showScreen('auth')" class="text-sm text-slate-500 hover:text-slate-700">Disconnect</button>
+  </header>
+  <main class="max-w-4xl mx-auto px-6 py-8">
+    <div class="mb-6">
+      <h1 class="text-xl font-bold text-slate-800">Select a Company</h1>
+      <p class="text-slate-500 text-sm mt-1">Choose a connected company to generate a credit model report.</p>
+    </div>
+    <div class="relative mb-4">
+      <span class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-4.35-4.35M17 11A6 6 0 115 11a6 6 0 0112 0z"/></svg>
+      </span>
+      <input id="search-input" type="text" oninput="handleSearch(this.value)" placeholder="Search companies…"
+        class="w-full border border-slate-300 rounded-lg pl-9 pr-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"/>
+    </div>
+    <div id="company-list"></div>
+    <div id="pagination" class="hidden flex items-center justify-between mt-4 text-sm text-slate-500">
+      <span id="page-info"></span>
+      <div class="flex gap-2">
+        <button onclick="changePage(-1)" id="prev-btn" class="px-3 py-1.5 border border-slate-300 rounded-lg hover:bg-slate-100">← Prev</button>
+        <button onclick="changePage(1)"  id="next-btn" class="px-3 py-1.5 border border-slate-300 rounded-lg hover:bg-slate-100">Next →</button>
+      </div>
+    </div>
+  </main>
+</div>
 
-      let currentPage = 1;
-      let totalPages = 1;
-      let searchQuery = '';
+<!-- ── Dashboard ────────────────────────────────────────────────────────────── -->
+<div id="dashboard-screen" class="hidden min-h-screen bg-slate-50 flex flex-col">
 
-      function showScreen(name) {
-        document.getElementById('auth-screen').classList.add('hidden');
-        document.getElementById('company-screen').classList.add('hidden');
-        document.getElementById('dashboard-screen').classList.add('hidden');
-        document.getElementById(name + '-screen').classList.remove('hidden');
-      }
+  <!-- Top nav -->
+  <header class="bg-white border-b border-slate-200 px-6 py-3 flex items-center justify-between flex-shrink-0">
+    <div class="flex items-center gap-3">
+      <button onclick="showScreen('company')" class="text-slate-400 hover:text-slate-600 mr-1">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+      </button>
+      <div class="w-7 h-7 rounded-lg bg-blue-600 flex items-center justify-center">
+        <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+        </svg>
+      </div>
+      <div>
+        <span id="nav-company-name" class="font-semibold text-slate-800 text-sm"></span>
+        <span class="ml-2 text-xs bg-blue-100 text-blue-700 px-1.5 py-0.5 rounded font-medium">Beta</span>
+      </div>
+    </div>
+    <div class="flex items-center gap-3 text-xs text-slate-500">
+      <span id="nav-data-sources"></span>
+    </div>
+  </header>
 
-      async function handleConnect() {
-        const btn = event.target;
-        btn.textContent = 'Connecting…';
-        btn.disabled = true;
-        try {
-          const res = await fetch('/api/companies?pageSize=1');
-          if (res.ok) {
-            showScreen('company');
-            fetchCompanies(1, '');
-          } else {
-            showError(
-              'auth-error',
-              `Server error (${res.status}). Check your CODAT_API_KEY in .env`
-            );
-          }
-        } catch (e) {
-          showError('auth-error', 'Could not reach the server.');
-        } finally {
-          btn.textContent = 'Connect to Codat';
-          btn.disabled = false;
-        }
-      }
+  <!-- Section tabs -->
+  <div class="bg-white border-b border-slate-200 px-6 flex gap-6 flex-shrink-0">
+    <button onclick="switchTab('financial')" id="tab-financial" class="py-3 text-sm font-medium border-b-2 border-blue-600 text-blue-600 -mb-px">Financial Summary</button>
+    <button onclick="switchTab('bank')"      id="tab-bank"      class="py-3 text-sm font-medium border-b-2 border-transparent text-slate-500 hover:text-slate-700 -mb-px">Bank Summary</button>
+    <button onclick="switchTab('scorecard')" id="tab-scorecard" class="py-3 text-sm font-medium border-b-2 border-transparent text-slate-500 hover:text-slate-700 -mb-px">Scorecard</button>
+    <button onclick="switchTab('debt')"      id="tab-debt"      class="py-3 text-sm font-medium border-b-2 border-transparent text-slate-500 hover:text-slate-700 -mb-px">Debt Summary</button>
+  </div>
 
-      function handleDisconnect() {
-        showScreen('auth');
-      }
+  <!-- Financial Summary panel -->
+  <div id="panel-financial" class="flex-1 overflow-auto p-6">
 
-      function showError(id, msg) {
-        const el = document.getElementById(id);
-        el.textContent = msg;
-        el.classList.remove('hidden');
-      }
+    <!-- Controls -->
+    <div class="flex items-center justify-between mb-4 flex-wrap gap-3">
+      <div>
+        <h2 class="text-base font-bold text-slate-800">Financial Summary</h2>
+        <p class="text-xs text-slate-500 mt-0.5">Last 24 months of P&L and Balance Sheet data</p>
+      </div>
+      <div class="flex items-center gap-3">
+        <label class="text-xs text-slate-600 font-medium">Financials as of:</label>
+        <input type="month" id="as-of-date" onchange="refreshFinancials()"
+          class="border border-slate-300 rounded-lg px-3 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-blue-500"/>
+        <div class="flex rounded-lg border border-slate-300 overflow-hidden text-xs">
+          <button onclick="setView('monthly')" id="view-monthly" class="px-3 py-1.5 bg-blue-600 text-white font-medium">Monthly</button>
+          <button onclick="setView('summary')" id="view-summary" class="px-3 py-1.5 bg-white text-slate-600 font-medium hover:bg-slate-50">Summary</button>
+        </div>
+      </div>
+    </div>
 
-      let searchTimeout;
-      function handleSearch(val) {
-        clearTimeout(searchTimeout);
-        searchTimeout = setTimeout(() => {
-          searchQuery = val;
-          fetchCompanies(1, val);
-        }, 400);
-      }
+    <!-- Key metrics row -->
+    <div id="metrics-row" class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-5"></div>
 
-      function changePage(dir) {
-        const newPage = currentPage + dir;
-        if (newPage < 1 || newPage > totalPages) return;
-        fetchCompanies(newPage, searchQuery);
-      }
+    <!-- Sub-tabs: P&L / Balance Sheet -->
+    <div class="flex gap-4 border-b border-slate-200 mb-4">
+      <button onclick="switchFinTab('pl')"  id="fin-tab-pl" class="pb-2 text-sm font-medium border-b-2 border-blue-600 text-blue-600 -mb-px">Profit & Loss</button>
+      <button onclick="switchFinTab('bs')"  id="fin-tab-bs" class="pb-2 text-sm font-medium border-b-2 border-transparent text-slate-500 hover:text-slate-700 -mb-px">Balance Sheet</button>
+    </div>
 
-      async function fetchCompanies(page, query) {
-        currentPage = page;
-        const list = document.getElementById('company-list');
-        list.innerHTML =
-          '<div class="flex items-center justify-center py-20 text-slate-400 text-sm">Loading companies…</div>';
-        try {
-          const params = new URLSearchParams({ page, pageSize: 10 });
-          if (query) params.set('query', `name=${query}`);
-          const res = await fetch(`/api/companies?${params}`);
-          const data = await res.json();
-          const companies = data.results || [];
-          totalPages = Math.ceil((data.totalResults || 0) / 10) || 1;
-          renderCompanies(companies);
-          renderPagination();
-        } catch (e) {
-          list.innerHTML = `<div class="text-red-600 text-sm bg-red-50 border border-red-200 rounded-lg px-4 py-3">Failed to load companies: ${e.message}</div>`;
-        }
-      }
+    <!-- Loading / error / table -->
+    <div id="fin-loading" class="hidden py-16 text-center text-slate-400 text-sm">Loading financial data…</div>
+    <div id="fin-error"   class="hidden py-8 text-center text-red-500 text-sm"></div>
+    <div id="fin-table-wrap" class="overflow-x-auto scrollbar-thin rounded-xl border border-slate-200 bg-white shadow-sm"></div>
+  </div>
 
-      function renderCompanies(companies) {
-        const list = document.getElementById('company-list');
-        if (!companies.length) {
-          list.innerHTML =
-            '<div class="text-center py-20 text-slate-400 text-sm">No companies found.</div>';
-          return;
-        }
-        list.innerHTML = `<div class="bg-white rounded-xl border border-slate-200 divide-y divide-slate-100 shadow-sm">
-        ${companies
-          .map((c) => {
-            const status = c.dataConnections?.[0]?.status || 'Unlinked';
-            const hasAccounting = c.dataConnections?.some(
-              (d) => d.sourceType === 'Accounting' && d.status === 'Linked'
-            );
-            const hasBanking = c.dataConnections?.some(
-              (d) => d.sourceType === 'Banking' && d.status === 'Linked'
-            );
-            const statusColor = STATUS_COLORS[status] || STATUS_COLORS.Unlinked;
-            const dotColor = DOT_COLORS[status] || DOT_COLORS.Unlinked;
-            return `
-            <button onclick="selectCompany('${c.id}', '${c.name.replace(
-              /'/g,
-              "\\'"
-            )}')"
-              class="w-full text-left px-5 py-4 hover:bg-slate-50 transition flex items-center justify-between group">
-              <div class="flex items-center gap-4">
-                <div class="w-10 h-10 rounded-lg bg-slate-100 flex items-center justify-center text-slate-600 font-bold text-sm flex-shrink-0">
-                  ${c.name?.[0]?.toUpperCase() || '?'}
-                </div>
-                <div>
-                  <div class="font-medium text-slate-800 text-sm">${
-                    c.name
-                  }</div>
-                  <div class="flex items-center gap-2 mt-1">
-                    <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-medium border ${
-                      hasAccounting
-                        ? 'bg-blue-50 border-blue-200 text-blue-700'
-                        : 'bg-slate-50 border-slate-200 text-slate-400'
-                    }">
-                      ${hasAccounting ? '✓ ' : ''}Accounting
-                    </span>
-                    <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-medium border ${
-                      hasBanking
-                        ? 'bg-blue-50 border-blue-200 text-blue-700'
-                        : 'bg-slate-50 border-slate-200 text-slate-400'
-                    }">
-                      ${hasBanking ? '✓ ' : ''}Banking
-                    </span>
-                  </div>
-                </div>
-              </div>
-              <div class="flex items-center gap-3">
-                <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium ${statusColor}">
-                  <span class="w-1.5 h-1.5 rounded-full ${dotColor}"></span>${status}
-                </span>
-                <svg class="w-4 h-4 text-slate-300 group-hover:text-blue-500 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-                </svg>
-              </div>
-            </button>`;
-          })
-          .join('')}
-      </div>`;
-      }
+  <!-- Other panels (placeholders) -->
+  <div id="panel-bank"      class="hidden flex-1 flex items-center justify-center text-slate-400 text-sm">Bank Summary — coming soon</div>
+  <div id="panel-scorecard" class="hidden flex-1 flex items-center justify-center text-slate-400 text-sm">Scorecard — coming soon</div>
+  <div id="panel-debt"      class="hidden flex-1 flex items-center justify-center text-slate-400 text-sm">Debt Summary — coming soon</div>
+</div>
 
-      function renderPagination() {
-        const el = document.getElementById('pagination');
-        if (totalPages <= 1) {
-          el.classList.add('hidden');
-          return;
-        }
-        el.classList.remove('hidden');
-        document.getElementById(
-          'page-info'
-        ).textContent = `Page ${currentPage} of ${totalPages}`;
-        document.getElementById('prev-btn').disabled = currentPage === 1;
-        document.getElementById('next-btn').disabled =
-          currentPage === totalPages;
-      }
+<script>
+// ═══════════════════════════════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════════════════════════════
+let state = {
+  currentCompanyId:   null,
+  currentCompanyName: null,
+  currentTab:         'financial',
+  currentFinTab:      'pl',
+  currentView:        'monthly',   // 'monthly' | 'summary'
+  plData:             null,
+  bsData:             null,
+  page:               1,
+  totalPages:         1,
+  searchQuery:        '',
+};
 
-      function selectCompany(id, name) {
-        document.getElementById('dashboard-name').textContent = name;
-        document.getElementById('dashboard-id').textContent = `ID: ${id}`;
-        showScreen('dashboard');
-      }
-    </script>
-  </body>
+// ═══════════════════════════════════════════════════════════════════
+// NAVIGATION
+// ═══════════════════════════════════════════════════════════════════
+function showScreen(name) {
+  ['auth','company','dashboard'].forEach(s =>
+    document.getElementById(s+'-screen').classList.add('hidden'));
+  document.getElementById(name+'-screen').classList.remove('hidden');
+}
+
+function switchTab(tab) {
+  state.currentTab = tab;
+  ['financial','bank','scorecard','debt'].forEach(t => {
+    const btn = document.getElementById('tab-'+t);
+    const panel = document.getElementById('panel-'+t);
+    if (t === tab) {
+      btn.className = 'py-3 text-sm font-medium border-b-2 border-blue-600 text-blue-600 -mb-px';
+      panel.classList.remove('hidden');
+    } else {
+      btn.className = 'py-3 text-sm font-medium border-b-2 border-transparent text-slate-500 hover:text-slate-700 -mb-px';
+      panel.classList.add('hidden');
+    }
+  });
+}
+
+function switchFinTab(tab) {
+  state.currentFinTab = tab;
+  ['pl','bs'].forEach(t => {
+    const btn = document.getElementById('fin-tab-'+t);
+    if (t === tab) btn.className = 'pb-2 text-sm font-medium border-b-2 border-blue-600 text-blue-600 -mb-px';
+    else           btn.className = 'pb-2 text-sm font-medium border-b-2 border-transparent text-slate-500 hover:text-slate-700 -mb-px';
+  });
+  renderFinancialTable();
+}
+
+function setView(v) {
+  state.currentView = v;
+  document.getElementById('view-monthly').className = v==='monthly'
+    ? 'px-3 py-1.5 bg-blue-600 text-white font-medium'
+    : 'px-3 py-1.5 bg-white text-slate-600 font-medium hover:bg-slate-50';
+  document.getElementById('view-summary').className = v==='summary'
+    ? 'px-3 py-1.5 bg-blue-600 text-white font-medium'
+    : 'px-3 py-1.5 bg-white text-slate-600 font-medium hover:bg-slate-50';
+  renderFinancialTable();
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// AUTH + COMPANY SELECTOR
+// ═══════════════════════════════════════════════════════════════════
+async function handleConnect() {
+  const btn = event.target; btn.textContent = 'Connecting…'; btn.disabled = true;
+  try {
+    const res = await fetch('/api/companies?pageSize=1');
+    if (res.ok) { showScreen('company'); fetchCompanies(1,''); }
+    else showError('auth-error', `Server error (${res.status}). Check your CODAT_API_KEY.`);
+  } catch(e) { showError('auth-error','Could not reach the server.'); }
+  finally { btn.textContent='Connect to Codat'; btn.disabled=false; }
+}
+
+function showError(id, msg) {
+  const el = document.getElementById(id);
+  el.textContent = msg; el.classList.remove('hidden');
+}
+
+let searchTimeout;
+function handleSearch(val) {
+  clearTimeout(searchTimeout);
+  searchTimeout = setTimeout(() => { state.searchQuery=val; fetchCompanies(1,val); }, 400);
+}
+function changePage(dir) {
+  const p = state.page + dir;
+  if (p<1||p>state.totalPages) return;
+  fetchCompanies(p, state.searchQuery);
+}
+
+async function fetchCompanies(page, query) {
+  state.page = page;
+  const list = document.getElementById('company-list');
+  list.innerHTML = '<div class="py-20 text-center text-slate-400 text-sm">Loading companies…</div>';
+  try {
+    const params = new URLSearchParams({page, pageSize:10});
+    if (query) params.set('query','name='+query);
+    const res  = await fetch('/api/companies?'+params);
+    const data = await res.json();
+    const companies = data.results||[];
+    state.totalPages = Math.ceil((data.totalResults||0)/10)||1;
+    renderCompanies(companies);
+    renderPagination();
+  } catch(e) {
+    list.innerHTML = `<div class="text-red-600 text-sm bg-red-50 border border-red-200 rounded-lg px-4 py-3">Failed to load: ${e.message}</div>`;
+  }
+}
+
+const STATUS_COLORS = { Linked:'bg-emerald-100 text-emerald-700', PendingAuth:'bg-amber-100 text-amber-700', Deauthorized:'bg-red-100 text-red-700', Unlinked:'bg-slate-100 text-slate-500' };
+const DOT_COLORS    = { Linked:'bg-emerald-500', PendingAuth:'bg-amber-500', Deauthorized:'bg-red-500', Unlinked:'bg-slate-400' };
+
+function renderCompanies(companies) {
+  const list = document.getElementById('company-list');
+  if (!companies.length) { list.innerHTML='<div class="text-center py-20 text-slate-400 text-sm">No companies found.</div>'; return; }
+  list.innerHTML = `<div class="bg-white rounded-xl border border-slate-200 divide-y divide-slate-100 shadow-sm">
+    ${companies.map(c => {
+      const status   = c.dataConnections?.[0]?.status||'Unlinked';
+      const hasAcc   = c.dataConnections?.some(d=>d.sourceType==='Accounting'&&d.status==='Linked');
+      const hasBank  = c.dataConnections?.some(d=>d.sourceType==='Banking'&&d.status==='Linked');
+      const sc = STATUS_COLORS[status]||STATUS_COLORS.Unlinked;
+      const dc = DOT_COLORS[status]||DOT_COLORS.Unlinked;
+      return `<button onclick="selectCompany('${c.id}','${c.name.replace(/'/g,"\\'")}')"
+        class="w-full text-left px-5 py-4 hover:bg-slate-50 transition flex items-center justify-between group">
+        <div class="flex items-center gap-4">
+          <div class="w-10 h-10 rounded-lg bg-slate-100 flex items-center justify-center text-slate-600 font-bold text-sm">${c.name?.[0]?.toUpperCase()||'?'}</div>
+          <div>
+            <div class="font-medium text-slate-800 text-sm">${c.name}</div>
+            <div class="flex gap-2 mt-1">
+              <span class="px-2 py-0.5 rounded text-xs font-medium border ${hasAcc?'bg-blue-50 border-blue-200 text-blue-700':'bg-slate-50 border-slate-200 text-slate-400'}">${hasAcc?'✓ ':''}Accounting</span>
+              <span class="px-2 py-0.5 rounded text-xs font-medium border ${hasBank?'bg-blue-50 border-blue-200 text-blue-700':'bg-slate-50 border-slate-200 text-slate-400'}">${hasBank?'✓ ':''}Banking</span>
+            </div>
+          </div>
+        </div>
+        <div class="flex items-center gap-3">
+          <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium ${sc}">
+            <span class="w-1.5 h-1.5 rounded-full ${dc}"></span>${status}
+          </span>
+          <svg class="w-4 h-4 text-slate-300 group-hover:text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+        </div>
+      </button>`;
+    }).join('')}
+  </div>`;
+}
+
+function renderPagination() {
+  const el = document.getElementById('pagination');
+  if (state.totalPages<=1) { el.classList.add('hidden'); return; }
+  el.classList.remove('hidden');
+  document.getElementById('page-info').textContent = `Page ${state.page} of ${state.totalPages}`;
+  document.getElementById('prev-btn').disabled = state.page===1;
+  document.getElementById('next-btn').disabled = state.page===state.totalPages;
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// DASHBOARD
+// ═══════════════════════════════════════════════════════════════════
+async function selectCompany(id, name) {
+  state.currentCompanyId   = id;
+  state.currentCompanyName = name;
+  document.getElementById('nav-company-name').textContent = name;
+
+  // Set default as-of date to current month
+  const now = new Date();
+  document.getElementById('as-of-date').value =
+    `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
+
+  showScreen('dashboard');
+  switchTab('financial');
+  await loadFinancials();
+}
+
+async function refreshFinancials() { await loadFinancials(); }
+
+async function loadFinancials() {
+  const loading = document.getElementById('fin-loading');
+  const error   = document.getElementById('fin-error');
+  const wrap    = document.getElementById('fin-table-wrap');
+  const metrics = document.getElementById('metrics-row');
+
+  loading.classList.remove('hidden');
+  error.classList.add('hidden');
+  wrap.innerHTML = '';
+  metrics.innerHTML = '';
+
+  const dateVal = document.getElementById('as-of-date').value; // "YYYY-MM"
+  const [year, month] = dateVal.split('-');
+  const reportDate = `${String(month).padStart(2,'0')}-${String(month).padStart(2,'0')}-${year}`;
+  const asOf = `${year}-${month}`;
+
+  try {
+    const [plRes, bsRes] = await Promise.all([
+      fetch(`/api/companies/${state.currentCompanyId}/financials/pl?reportDate=${formatDateForApi(dateVal)}&numberOfPeriods=24`),
+      fetch(`/api/companies/${state.currentCompanyId}/financials/bs?reportDate=${formatDateForApi(dateVal)}&numberOfPeriods=24`),
+    ]);
+    state.plData = await plRes.json();
+    state.bsData = await bsRes.json();
+    loading.classList.add('hidden');
+    renderMetrics();
+    renderFinancialTable();
+  } catch(e) {
+    loading.classList.add('hidden');
+    error.classList.remove('hidden');
+    error.textContent = `Failed to load financial data: ${e.message}`;
+  }
+}
+
+function formatDateForApi(yyyyMM) {
+  const [y, m] = yyyyMM.split('-');
+  const lastDay = new Date(y, m, 0).getDate();
+  return `${String(lastDay).padStart(2,'0')}-${String(m).padStart(2,'0')}-${y}`;
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// METRICS ROW
+// ═══════════════════════════════════════════════════════════════════
+function renderMetrics() {
+  const pl = state.plData;
+  if (!pl || !pl.reportItems) return;
+
+  // Get LTM periods (last 12)
+  const periods = getPeriods(pl);
+  const ltmPeriods = periods.slice(-12);
+
+  const revenue  = sumCategory(pl, ltmPeriods, 'Income');
+  const cogs     = sumCategory(pl, ltmPeriods, 'Expense.CostOfSales');
+  const opex     = sumCategory(pl, ltmPeriods, 'Expense.Operating');
+  const grossP   = revenue - cogs;
+  const ebitda   = grossP - opex;
+  const grossM   = revenue ? (grossP/revenue*100) : 0;
+  const ebitdaM  = revenue ? (ebitda/revenue*100) : 0;
+
+  const cards = [
+    { label:'LTM Revenue',      value: fmt(revenue),           sub: 'Last 12 months' },
+    { label:'Gross Profit',     value: fmt(grossP),            sub: `Margin: ${grossM.toFixed(1)}%` },
+    { label:'EBITDA',           value: fmt(ebitda),            sub: `Margin: ${ebitdaM.toFixed(1)}%` },
+    { label:'Gross Margin',     value: grossM.toFixed(1)+'%',  sub: 'LTM average' },
+  ];
+
+  document.getElementById('metrics-row').innerHTML = cards.map(c => `
+    <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-4">
+      <div class="text-xs text-slate-500 font-medium mb-1">${c.label}</div>
+      <div class="text-xl font-bold text-slate-800">${c.value}</div>
+      <div class="text-xs text-slate-400 mt-0.5">${c.sub}</div>
+    </div>`).join('');
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// FINANCIAL TABLE
+// ═══════════════════════════════════════════════════════════════════
+function renderFinancialTable() {
+  const wrap = document.getElementById('fin-table-wrap');
+  const data = state.currentFinTab === 'pl' ? state.plData : state.bsData;
+
+  if (!data || !data.reportItems) {
+    wrap.innerHTML = '<div class="py-12 text-center text-slate-400 text-sm">No data available.</div>';
+    return;
+  }
+
+  const periods  = getPeriods(data);
+  const cols     = state.currentView === 'monthly' ? periods : getSummaryCols(periods);
+  const colLabels = state.currentView === 'monthly'
+    ? periods.map(p => formatPeriodLabel(p))
+    : ['LTM', 'L6M', 'L3M'];
+
+  // Group items by top-level category
+  const groups = groupByCategory(data.reportItems, state.currentFinTab);
+
+  let html = `<table class="w-full text-xs border-collapse" style="min-width:${200 + cols.length*90}px">
+    <thead>
+      <tr class="border-b border-slate-200">
+        <th class="sticky left-0 bg-white text-left px-4 py-2.5 font-semibold text-slate-700 w-48 z-10">Account</th>
+        ${colLabels.map(l=>`<th class="num px-3 py-2.5 font-semibold text-slate-700 whitespace-nowrap">${l}</th>`).join('')}
+      </tr>
+    </thead>
+    <tbody>`;
+
+  groups.forEach(group => {
+    // Section header
+    html += `<tr class="section-header"><td class="sticky left-0 px-4 py-2 z-10" colspan="${cols.length+1}">${group.label}</td></tr>`;
+
+    // Line items
+    group.items.forEach(item => {
+      const vals = state.currentView === 'monthly'
+        ? cols.map(p => getVal(item, p))
+        : getSummaryVals(item, periods);
+      html += `<tr class="data-row border-b border-slate-100">
+        <td class="sticky left-0 bg-white px-4 py-1.5 text-slate-600 z-10 pl-7">${item.accountName||item.name||'—'}</td>
+        ${vals.map(v => `<td class="num px-3 py-1.5 ${v<0?'negative':''}">${v!==null?fmt(v):'—'}</td>`).join('')}
+      </tr>`;
+    });
+
+    // Subtotal
+    const subtotals = state.currentView === 'monthly'
+      ? cols.map(p => group.items.reduce((s,i)=>s+(getVal(i,p)||0),0))
+      : getSummaryVals({ _subtotal: true, _group: group }, periods);
+    html += `<tr class="subtotal border-b border-slate-200">
+      <td class="sticky left-0 px-4 py-2 z-10">Total ${group.label}</td>
+      ${subtotals.map(v=>`<td class="num px-3 py-2 ${v<0?'negative':''}">${fmt(v)}</td>`).join('')}
+    </tr>`;
+  });
+
+  // Grand total
+  if (state.currentFinTab === 'pl') {
+    const netLabel = 'Net Profit / (Loss)';
+    const netVals = state.currentView === 'monthly'
+      ? cols.map(p => calcNet(data, p))
+      : ['LTM','L6M','L3M'].map((_, i) => {
+          const ps = getSummaryPeriods(periods, i);
+          return ps.reduce((s,p)=>s+calcNet(data,p),0);
+        });
+    html += `<tr class="total border-b border-slate-300">
+      <td class="sticky left-0 px-4 py-2.5 z-10">${netLabel}</td>
+      ${netVals.map(v=>`<td class="num px-3 py-2.5 ${v<0?'negative':''}">${fmt(v)}</td>`).join('')}
+    </tr>`;
+  }
+
+  html += '</tbody></table>';
+  wrap.innerHTML = html;
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// DATA HELPERS
+// ═══════════════════════════════════════════════════════════════════
+function getPeriods(data) {
+  if (!data.reportItems?.length) return [];
+  const set = new Set();
+  data.reportItems.forEach(item => {
+    (item.measures||[]).forEach(m => { if (m.periodStart) set.add(m.periodStart); });
+  });
+  return [...set].sort();
+}
+
+function getVal(item, period) {
+  if (item._subtotal) return null;
+  const m = (item.measures||[]).find(x=>x.periodStart===period);
+  return m ? (m.value||0) : null;
+}
+
+function sumCategory(data, periods, catPrefix) {
+  if (!data?.reportItems) return 0;
+  return data.reportItems
+    .filter(i => (i.accountCategory?.levels||[]).some(l=>l.levelName?.startsWith(catPrefix)))
+    .reduce((sum,item) => sum + periods.reduce((s,p)=>s+(getVal(item,p)||0),0), 0);
+}
+
+function calcNet(data, period) {
+  if (!data?.reportItems) return 0;
+  return data.reportItems.reduce((sum, item) => {
+    const cat = (item.accountCategory?.levels||[]).map(l=>l.levelName).join('.');
+    const v = getVal(item, period)||0;
+    return sum + (cat.startsWith('Income') ? v : cat.startsWith('Expense') ? -v : 0);
+  }, 0);
+}
+
+function getSummaryCols(periods) {
+  return ['LTM','L6M','L3M'];
+}
+
+function getSummaryPeriods(allPeriods, idx) {
+  const n = [12,6,3][idx];
+  return allPeriods.slice(-n);
+}
+
+function getSummaryVals(item, allPeriods) {
+  if (item._subtotal && item._group) {
+    return [12,6,3].map(n => {
+      const ps = allPeriods.slice(-n);
+      return item._group.items.reduce((s,i)=>s+ps.reduce((ss,p)=>ss+(getVal(i,p)||0),0),0);
+    });
+  }
+  return [12,6,3].map(n => {
+    const ps = allPeriods.slice(-n);
+    return ps.reduce((s,p)=>s+(getVal(item,p)||0),0);
+  });
+}
+
+function groupByCategory(items, finTab) {
+  if (finTab === 'pl') {
+    const income  = items.filter(i=>getCatTop(i)==='Income');
+    const cos     = items.filter(i=>getCatTop(i)==='Expense.CostOfSales'||getCat2(i)==='CostOfSales');
+    const opex    = items.filter(i=>getCatTop(i)==='Expense.Operating'||getCat2(i)==='Operating');
+    const other   = items.filter(i=>!income.includes(i)&&!cos.includes(i)&&!opex.includes(i));
+    return [
+      { label:'Income',            items: income },
+      { label:'Cost of Sales',     items: cos    },
+      { label:'Operating Expenses',items: opex   },
+      ...(other.length?[{label:'Other',items:other}]:[]),
+    ].filter(g=>g.items.length);
+  } else {
+    const assets  = items.filter(i=>getCatTop(i)==='Asset');
+    const liab    = items.filter(i=>getCatTop(i)==='Liability');
+    const equity  = items.filter(i=>getCatTop(i)==='Equity');
+    const other   = items.filter(i=>!assets.includes(i)&&!liab.includes(i)&&!equity.includes(i));
+    return [
+      { label:'Assets',      items: assets  },
+      { label:'Liabilities', items: liab    },
+      { label:'Equity',      items: equity  },
+      ...(other.length?[{label:'Other',items:other}]:[]),
+    ].filter(g=>g.items.length);
+  }
+}
+
+function getCatTop(item) {
+  return (item.accountCategory?.levels||[])[0]?.levelName||'';
+}
+function getCat2(item) {
+  return (item.accountCategory?.levels||[])[1]?.levelName||'';
+}
+
+function formatPeriodLabel(p) {
+  if (!p) return '';
+  const d = new Date(p);
+  return d.toLocaleDateString('en-GB',{month:'short',year:'2-digit'});
+}
+
+function fmt(n) {
+  if (n===null||n===undefined||isNaN(n)) return '—';
+  const abs = Math.abs(n);
+  let s;
+  if (abs>=1000000)      s=(n/1000000).toFixed(1)+'M';
+  else if (abs>=1000)    s=(n/1000).toFixed(1)+'K';
+  else                   s=n.toFixed(0);
+  return n<0?`(${s.replace('-','')})`:s;
+}
+</script>
+</body>
 </html>
